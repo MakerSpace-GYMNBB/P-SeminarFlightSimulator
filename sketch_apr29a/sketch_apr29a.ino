@@ -1,4 +1,4 @@
-String incomingByte;
+String incomingString;
 
 void setup() {
   // put your setup code here, to run once:
@@ -8,10 +8,10 @@ void setup() {
 void loop() {
   // put your main code here, to run repeatedly:
   if (Serial.available() > 0) {
-        incomingByte = Serial.readStringUntil("\n");
+        incomingString = Serial.readStringUntil("\n");
 
         Serial.print("I get ");
-        Serial.println(incomingByte);
+        Serial.println(incomingString);
   }
   
 
