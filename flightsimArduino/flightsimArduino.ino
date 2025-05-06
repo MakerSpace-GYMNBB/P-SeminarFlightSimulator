@@ -1,5 +1,6 @@
 #include <Wire.h>
 #include <MPU6050.h>
+#include <engineLibrary.h>
 
 #define BTN_PIN 7  //engine  controller pins
 #define RPWM_PIN 5
@@ -20,12 +21,16 @@ char incomingChar;
 
 void setup() {
 
-  pinMode(BTN_PIN, INPUT);  // engine controller pins
-  pinMode(RPWM_PIN, OUTPUT);
-  pinMode(LPWM_PIN, OUTPUT);
-  analogWrite(RPWM_PIN, 0);
-  analogWrite(LPWM_PIN, 0);
-  
+
+  initializeEngine(RPWM_PIN, LPWM_PIN);
+  rotate('r', 100);
+  delay(5000);
+  rotate('l', 100);
+  delay(2500);
+  rotate('l', 255);
+  delay(2500);
+  stop();
+  ;
 
 
   //initialize serial connection for gyro
