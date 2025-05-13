@@ -2,27 +2,86 @@
 #include <MPU6050.h>
 #include <engineLibrary.h>
 
-#define BTN_PIN 7  //engine  controller pins
+//engine  controller pins
 #define RPWM_PIN 5
 #define LPWM_PIN 6
 
-unsigned long T1 = 0, T2 = 0;     //variables for engine
-uint8_t TimeInterval = 5; // 5ms
-bool Direction = 0;
 
 MPU6050 mpu; //variables for gyro
 
-int winkel = 30;
 
-double pitch;
-double roll;
-String zwischenspeicher;
-char incomingChar;
+int values[2];
+int pitch;
+int roll;
+int pitchG;
+int rollG;
+String incomingString;
 
 void setup() {
 
-
   initializeEngine(RPWM_PIN, LPWM_PIN);
+
+  //initialize serial connection for gyro
+  Serial.begin(9600);
+  while(!mpu.begin(MPU6050_SCALE_2000DPS, MPU6050_RANGE_2G))
+  {
+    Serial.println("Could not find a valid MPU6050 sensor, check wiring!");
+    delay(500);
+  }
+  testEngine();
+}
+
+void loop() {
+
+  readGyro();
+  readSerial();
+  
+
+  
+
+  delay(10); // war mal 100
+}
+
+
+void readGyro(){
+  Vector normAccel = mpu.readNormalizeAccel();
+  pitchG = -(atan2(normAccel.XAxis, sqrt(normAccel.YAxis*normAccel.YAxis + normAccel.ZAxis*normAccel.ZAxis))*180.0)/M_PI;
+  rollG = (atan2(normAccel.YAxis, normAccel.ZAxis)*180.0)/M_PI;
+}
+int splitString(String input, char delimiter, int output[], int maxParts) {
+  int count = 0;
+  int startIndex = 0;
+  int delimIndex = input.indexOf(delimiter);
+  
+
+  while (delimIndex >= 0 && count < maxParts - 1) {
+
+
+    
+    output[count++] = input.substring(startIndex).toInt();
+    startIndex = delimIndex + 1;
+    delimIndex = input.indexOf(delimiter, startIndex);
+  }
+
+  // Add the last part
+  output[count++] = input.substring(startIndex).toInt();
+  return count;
+}
+void readSerial(){
+  if (Serial.available() > 0) {
+
+        incomingString = Serial.readStringUntil("\n");
+        
+        int count = splitString(incomingString, ';', values, 2);
+        for (int i = 0; i < count; i++){
+          Serial.println(values[i]);
+        }
+        pitch = values[0];
+        roll = values[1];
+  }
+}
+
+void testEngine(){
   rotate('r', 100);
   delay(5000);
   rotate('l', 100);
@@ -30,68 +89,4 @@ void setup() {
   rotate('l', 255);
   delay(2500);
   stop();
-  ;
-
-
-  //initialize serial connection for gyro
-  Serial.begin(115200);
-  while(!mpu.begin(MPU6050_SCALE_2000DPS, MPU6050_RANGE_2G))
-  {
-    Serial.println("Could not find a valid MPU6050 sensor, check wiring!");
-    delay(500);
-  }
-  //while(Serial.available() = 0)  {}
-}
-
-void loop() {
-
-  readGyro();
-
-
-  if(winkel - pitch > 0){
-    //analogWrite(RPWM_PIN, )
-  }
-
-  delay(10); // war mal 100
-}
-
-/*void readSerial(){
-  Serial.print("T");
-  while((char)Serial.Read() != '&'){
-
-  }
-
-  zwischenspeicher = "";
-
-  do{
-    incomingChar = (char)Serial.read;
-    zwischenspeicher = zwischenspeicher + incomingChar;
-  }while(incomingChar != '%');
-
-  pitch = zwischenspeicher.toDouble();
-  zwischenspeicher = "";
-
-  do{
-    incomingChar = (char)Serial.read;
-    zwischenspeicher = zwischenspeicher + incomingChar;
-  }while(incomingChar != '§');
-  
-  roll = zwischenspeicher.toDouble();
-
-}*/
-
-void readGyro(){
-  Vector normAccel = mpu.readNormalizeAccel();
-  int pitch = -(atan2(normAccel.XAxis, sqrt(normAccel.YAxis*normAccel.YAxis + normAccel.ZAxis*normAccel.ZAxis))*180.0)/M_PI;
-  int roll = (atan2(normAccel.YAxis, normAccel.ZAxis)*180.0)/M_PI;
-
-  Serial.print(pitch);
-  Serial.print(" ");
-  Serial.print(roll);
-  Serial.println();
-}
-bool debounce(void){
-  static uint16_t btnState = 0;
-  btnState = (btnState<<1) | (!digitalRead(BTN_PIN));
-  return (btnState == 0xFFF0);
 }
