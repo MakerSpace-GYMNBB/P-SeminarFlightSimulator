@@ -1,12 +1,18 @@
 #include <stdlib.h>
+#include <engineLibrary.h>
+
+
 
 String incomingString;
 int values[2];
+int pitch;
+int roll;
 
 
 void setup() {
   // put your setup code here, to run once:
   Serial.begin(9600);
+  initializeEngine(int RPWM_PIN_new, int LPWM_PIN_new);
 }
 
 void loop() {
@@ -21,6 +27,11 @@ void loop() {
         for (int i = 0; i < count; i++){
           Serial.println(values[i]);
         }
+        pitch = values[0];
+        roll = values[1];
+
+        
+
   }
 }
 
