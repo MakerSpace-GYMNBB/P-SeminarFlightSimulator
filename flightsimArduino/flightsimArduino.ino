@@ -34,7 +34,9 @@ void setup() {
 void loop() {
 
   readGyro();
-  readSerial();
+  //readSerial();
+  //convertPitch(pitch);
+  //setEngineRoll(convertRoll(roll));
   
 
   
@@ -42,11 +44,37 @@ void loop() {
   delay(10); // war mal 100
 }
 
+int convertPitch(int pitchN){
+  if(pitchN > 30){
+    return 30;
+  }
+  else if(pitchN < -30){
+    return -30;
+  }
+  else{
+    return pitchN;
+  }
+}
+
+int convertRoll(int rollN){
+  if(rollN > 30){
+    return 30;
+  }
+  else if(rollN < -30){
+    return -30;
+  }
+  else{
+    return rollN;
+  }
+}
 
 void readGyro(){
   Vector normAccel = mpu.readNormalizeAccel();
   pitchG = -(atan2(normAccel.XAxis, sqrt(normAccel.YAxis*normAccel.YAxis + normAccel.ZAxis*normAccel.ZAxis))*180.0)/M_PI;
   rollG = (atan2(normAccel.YAxis, normAccel.ZAxis)*180.0)/M_PI;
+
+  //Serial.println(pitchG);
+  //Serial.println(rollG);
 }
 int splitString(String input, char delimiter, int output[], int maxParts) {
   int count = 0;
@@ -80,6 +108,36 @@ void readSerial(){
         roll = values[1];
   }
 }
+
+void setEngineRoll(int roll){
+  if(abs(roll - rollG) > 2){ // 2 degree tolerance
+    if(roll - rollG > 0){
+        rotate('r', 100);
+    }
+    else{
+        rotate('l', 100);
+    }
+  }
+  else{
+    stop();
+  }
+
+}
+
+/*void setEnginePitch(int pitch){
+  if(abs(pitch - pitchG) > 2){ // 2 degree tolerance
+    if(pitch - pitchG > 0){
+        rotate('r', 100);
+    }
+    else{
+        rotate('l', 100);
+    }
+  }
+  else{
+    stop();
+  }
+
+}*/
 
 void testEngine(){
   rotate('r', 100);
